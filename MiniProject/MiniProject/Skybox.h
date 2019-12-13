@@ -62,7 +62,7 @@ private:
 	GLuint VBO;
 	GLuint EBO;
 
-	void initSkyVAO()
+	void initializeSkyVAO()
 	{
 		// Create VAO
 		glCreateVertexArrays(1, &this->VAO);
@@ -87,7 +87,7 @@ private:
 public:
 	Skybox()
 	{
-		this->initSkyVAO();
+		this->initializeSkyVAO();
 	}
 
 	~Skybox()

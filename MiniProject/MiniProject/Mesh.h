@@ -28,7 +28,7 @@ private:
 
 	glm::mat4 ModelMatrix;
 
-	void initVAO()
+	void initializeVAO()
 	{
 		// Create VAO
 		glCreateVertexArrays(1, &this->VAO);
@@ -110,7 +110,7 @@ public:
 			this->indexArray[i] = indexArray[i];
 		}
 
-		this->initVAO();
+		this->initializeVAO();
 		this->updateModelMatrix();
 	}
 
@@ -143,7 +143,7 @@ public:
 			this->indexArray[i] = shape->getIndices()[i];
 		}
 
-		this->initVAO();
+		this->initializeVAO();
 		this->updateModelMatrix();
 	}
 
@@ -169,7 +169,7 @@ public:
 			this->indexArray[i] = obj.indexArray[i];
 		}
 		
-		this->initVAO();
+		this->initializeVAO();
 		this->updateModelMatrix();
 	}
 

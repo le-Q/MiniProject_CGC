@@ -1,7 +1,7 @@
 #include "Engine.h"
 
 // Private functions
-void Engine::initGLFW()
+void Engine::initializeGLFW()
 {
 	// INIT GLFW
 	if (glfwInit() == GLFW_FALSE)
@@ -11,7 +11,7 @@ void Engine::initGLFW()
 	}
 }
 
-void Engine::initWindow(const char* title)
+void Engine::initializeWindow(const char* title)
 {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, this->GL_VERSION_MAJOR);
@@ -28,7 +28,7 @@ void Engine::initWindow(const char* title)
 	glfwMakeContextCurrent(this->window);
 }
 
-void Engine::initGLEW()
+void Engine::initializeGLEW()
 {
 	// INIT GLEW (NEEDS WINDOW AND OPENGL CONTEXT)
 	glewExperimental = GL_TRUE;
@@ -41,7 +41,7 @@ void Engine::initGLEW()
 	}
 }
 
-void Engine::initOpenGLOptions()
+void Engine::initializeOpenGLOptions()
 {
 	glEnable(GL_DEPTH_TEST);
 
@@ -58,7 +58,7 @@ void Engine::initOpenGLOptions()
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
-void Engine::initMatrices()
+void Engine::initializeMatrices()
 {
 	this->ViewMatrix = glm::mat4(1.f);
 	this->ViewMatrix = glm::lookAt(this->cameraPosition, this->cameraPosition + this->camFront, this->cameraUp);
@@ -72,13 +72,13 @@ void Engine::initMatrices()
 	);
 }
 
-void Engine::initShaders()
+void Engine::initializeShaders()
 {
 	this->shaders.push_back(new Shader("vertex.glsl", "fragment.glsl"));
 	this->shaders.push_back(new Shader("vertex_sky.glsl", "fragment_sky.glsl"));
 }
 
-void Engine::initTextures()
+void Engine::initializeTextures()
 {
 	std::vector<std::string> faces
 	{
@@ -101,13 +101,13 @@ void Engine::initTextures()
 	this->textures.push_back(new Texture(faces, GL_TEXTURE_CUBE_MAP));
 }
 
-void Engine::initMaterials()
+void Engine::initializeMaterials()
 {
 	this->materials.push_back(new Material(glm::vec3(0.1f), glm::vec3(1.f), glm::vec3(1.f),
 		0, 1));
 }
 
-void Engine::initModels()
+void Engine::initializeModels()
 {
 	std::vector<Mesh*>meshes;
 	std::vector<Mesh*>floor;
@@ -228,12 +228,12 @@ void Engine::initModels()
 		delete i;
 }
 
-void Engine::initLights()
+void Engine::initializeLights()
 {
 	this->lights.push_back(new glm::vec3(2.5f, 2.f, 2.5f));
 }
 
-void Engine::initUniforms()
+void Engine::initializeUniforms()
 {
 	// INIT UNIFORMS
 	this->shaders[SHADER_CORE_PROGRAM]->setMat4fv(ViewMatrix, "ViewMatrix");
@@ -310,18 +310,18 @@ Engine::Engine(
 	this->mouseOffsetY = 0.0;
 	this->firstMouse = true;
 
-	this->initGLFW();
-	this->initWindow(title);
-	this->initGLEW();
-	this->initOpenGLOptions();
+	this->initializeGLFW();
+	this->initializeWindow(title);
+	this->initializeGLEW();
+	this->initializeOpenGLOptions();
 
-	this->initMatrices();
-	this->initShaders();
-	this->initTextures();
-	this->initMaterials();
-	this->initModels();
-	this->initLights();
-	this->initUniforms();
+	this->initializeMatrices();
+	this->initializeShaders();
+	this->initializeTextures();
+	this->initializeMaterials();
+	this->initializeModels();
+	this->initializeLights();
+	this->initializeUniforms();
 }
 
 Engine::~Engine()
@@ -431,7 +431,7 @@ void Engine::update()
 
 
 	//this->models[3]->move(glm::vec3(0.f, 0.f, -0.002f), 8);
-	// this->models[3]->rotate(glm::vec3(0.f, 1.f, 0.f));
+	//this->models[3]->rotate(glm::vec3(0.f, 1.f, 0.f));
 
 }
 

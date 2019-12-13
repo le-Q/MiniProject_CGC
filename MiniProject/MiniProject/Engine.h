@@ -70,17 +70,17 @@ private:
 	std::vector<glm::vec3*> lights;
 
 	// Private functions
-	void initGLFW();
-	void initWindow(const char* title);
-	void initGLEW();
-	void initOpenGLOptions();
-	void initMatrices();
-	void initShaders();
-	void initTextures();
-	void initMaterials();
-	void initModels();
-	void initLights();
-	void initUniforms();
+	void initializeGLFW();
+	void initializeWindow(const char* title);
+	void initializeGLEW();
+	void initializeOpenGLOptions();
+	void initializeMatrices();
+	void initializeShaders();
+	void initializeTextures();
+	void initializeMaterials();
+	void initializeModels();
+	void initializeLights();
+	void initializeUniforms();
 
 	void updateUniforms();
 
