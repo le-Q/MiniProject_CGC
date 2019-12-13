@@ -1,9 +1,9 @@
 #include "Engine.h"
 
-//Private functions
+// Private functions
 void Engine::initGLFW()
 {
-	//INIT GLFW
+	// INIT GLFW
 	if (glfwInit() == GLFW_FALSE)
 	{
 		std::cout << "ERROR::GLFW_INIT_FAILED" << "\n";
@@ -11,17 +11,11 @@ void Engine::initGLFW()
 	}
 }
 
-void Engine::initWindow(
-	const char* title,
-	bool resizable
-)
+void Engine::initWindow(const char* title)
 {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, this->GL_VERSION_MAJOR);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, this->GL_VERSION_MINOR);
-	glfwWindowHint(GLFW_RESIZABLE, resizable);
-
-	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); MAC OS
 
 	this->window = glfwCreateWindow(this->WINDOW_WIDTH, this->WINDOW_HEIGHT, title, NULL, NULL);
 
@@ -31,21 +25,15 @@ void Engine::initWindow(
 		glfwTerminate();
 	}
 
-	glfwGetFramebufferSize(this->window, &this->framebufferWidth, &this->framebufferHeight);
-	glfwSetFramebufferSizeCallback(window, Engine::framebuffer_resize_callback);
-	//IMPORTANT WHITH PERSPECTIVE MATRIX!!!
-
-	//glViewport(0, 0, framebufferWidth, framebufferHeight);
-
-	glfwMakeContextCurrent(this->window); //IMPORTANT!!
+	glfwMakeContextCurrent(this->window);
 }
 
 void Engine::initGLEW()
 {
-	//INIT GLEW (NEEDS WINDOW AND OPENGL CONTEXT)
+	// INIT GLEW (NEEDS WINDOW AND OPENGL CONTEXT)
 	glewExperimental = GL_TRUE;
 
-	//Error
+	// Error
 	if (glewInit() != GLEW_OK)
 	{
 		std::cout << "ERROR::MAIN.CPP::GLEW_INIT_FAILED" << "\n";
@@ -66,14 +54,14 @@ void Engine::initOpenGLOptions()
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	//Input
+	// Input
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 void Engine::initMatrices()
 {
 	this->ViewMatrix = glm::mat4(1.f);
-	this->ViewMatrix = glm::lookAt(this->camPosition, this->camPosition + this->camFront, this->worldUp);
+	this->ViewMatrix = glm::lookAt(this->cameraPosition, this->cameraPosition + this->camFront, this->cameraUp);
 
 	this->ProjectionMatrix = glm::mat4(1.f);
 	this->ProjectionMatrix = glm::perspective(
@@ -87,17 +75,30 @@ void Engine::initMatrices()
 void Engine::initShaders()
 {
 	this->shaders.push_back(new Shader("vertex.glsl", "fragment.glsl"));
+	this->shaders.push_back(new Shader("vertex_sky.glsl", "fragment_sky.glsl"));
 }
 
 void Engine::initTextures()
 {
-	//TEXTURE 0
-	//this->textures.push_back(new Texture("Images/pusheen.png", GL_TEXTURE_2D));
-	//this->textures.push_back(new Texture("Images/pusheen_specular.png", GL_TEXTURE_2D));
+	std::vector<std::string> faces
+	{
+		"Skybox/right.jpg",
+		"Skybox/left.jpg",
+		"Skybox/top.jpg",
+		"Skybox/bottom.jpg",
+		"Skybox/front.jpg",
+		"Skybox/back.jpg"
+	};
 
-	//TEXTURE 1
+	// TEXTURE 0
 	this->textures.push_back(new Texture("Images/container.png", GL_TEXTURE_2D));
 	this->textures.push_back(new Texture("Images/container_specular.png", GL_TEXTURE_2D));
+
+	// TEXTURE 1
+	this->textures.push_back(new Texture("Images/wood.png", GL_TEXTURE_2D));
+
+	// SkyBox
+	this->textures.push_back(new Texture(faces, GL_TEXTURE_CUBE_MAP));
 }
 
 void Engine::initMaterials()
@@ -109,17 +110,48 @@ void Engine::initMaterials()
 void Engine::initModels()
 {
 	std::vector<Mesh*>meshes;
+	std::vector<Mesh*>floor;
 	std::vector<Mesh*>cubes;
-	std::vector<Mesh*>lightSource;
+	std::vector<Mesh*>skyboxTest;
 
-	meshes.push_back(
+	skybox = new Skybox();
+
+	skyboxTest.push_back(
 		new Mesh(
-			&Pyramid(),
-			glm::vec3(1.f, 0.f, 0.f),
+			&SkyboxShape(),
+			glm::vec3(0.f, 0.f, 0.f),
 			glm::vec3(0.f),
 			glm::vec3(0.f),
-			glm::vec3(1.f)
+			glm::vec3(20.f)
 		)
+	);
+
+	this->models.push_back(new Model(
+		glm::vec3(0.f),
+		this->materials[0],
+		this->textures[SKYBOX],
+		this->textures[SKYBOX],
+		skyboxTest
+	)
+	);
+
+	floor.push_back(
+		new Mesh(
+			&Square(),
+			glm::vec3(0.f, 0.f, -.5f),
+			glm::vec3(0.f, 0.f, 0.f),
+			glm::vec3(270.f, 0.f, 0.f),
+			glm::vec3(20.f)
+		)
+	);
+
+	this->models.push_back(new Model(
+		glm::vec3(0.f),
+		this->materials[0],
+		this->textures[TEX_WOOD],
+		this->textures[TEX_WOOD],
+		floor
+	)
 	);
 
 	meshes.push_back(
@@ -137,22 +169,12 @@ void Engine::initModels()
 			&Cube(),
 			glm::vec3(0.f, 0.f, 0.f),
 			glm::vec3(0.f),
-			glm::vec3(0.f),
+			glm::vec3(0.f, 45.f, 0.f),
 			glm::vec3(1.f)
 		)
 	);
 
 	cubes.push_back(
-		new Mesh(
-			&Cube(),
-			glm::vec3(0.f, 1.f, 0.f),
-			glm::vec3(0.f),
-			glm::vec3(0.f),
-			glm::vec3(1.f)
-		)
-	);
-
-	lightSource.push_back(
 		new Mesh(
 			&Cube(),
 			glm::vec3(0.f, 1.f, 0.f),
@@ -181,13 +203,23 @@ void Engine::initModels()
 	);
 
 	this->models.push_back(new Model(
-		glm::vec3(0.f, 0.f, 0.f),
+		glm::vec3(4.f, 0.f, 0.f),
 		this->materials[0],
 		this->textures[TEX_CONTAINER],
 		this->textures[TEX_CONTAINER_SPECULAR],
-		lightSource
+		meshes
 	)
 	);
+
+	this->models.push_back(new Model(
+		glm::vec3(-2.f, 0.f, 0.f),
+		this->materials[0],
+		this->textures[TEX_CONTAINER],
+		this->textures[TEX_CONTAINER_SPECULAR],
+		cubes
+	)
+	);
+	
 
 	for (auto*& i : meshes)
 		delete i;
@@ -198,31 +230,36 @@ void Engine::initModels()
 
 void Engine::initLights()
 {
-
-	this->lights.push_back(new glm::vec3(2.f, 0.f, 0.f));
+	this->lights.push_back(new glm::vec3(2.5f, 2.f, 2.5f));
 }
 
 void Engine::initUniforms()
 {
-	//INIT UNIFORMS
+	// INIT UNIFORMS
 	this->shaders[SHADER_CORE_PROGRAM]->setMat4fv(ViewMatrix, "ViewMatrix");
 	this->shaders[SHADER_CORE_PROGRAM]->setMat4fv(ProjectionMatrix, "ProjectionMatrix");
+	this->shaders[SKYBOX_PROGRAM]->setMat4fv(ViewMatrix, "ViewMatrix");
+	this->shaders[SKYBOX_PROGRAM]->setMat4fv(ProjectionMatrix, "ProjectionMatrix");
+
 
 	this->shaders[SHADER_CORE_PROGRAM]->setVec3f(*this->lights[0], "lightPos0");
 }
 
 void Engine::updateUniforms()
 {
-	//Update view matrix (camera)
+	// Update view matrix (camera)
 	this->ViewMatrix = this->camera.getViewMatrix();
 
 	this->shaders[SHADER_CORE_PROGRAM]->setMat4fv(this->ViewMatrix, "ViewMatrix");
 	this->shaders[SHADER_CORE_PROGRAM]->setVec3f(this->camera.getPosition(), "cameraPos");
 
-	glm::vec3 light = glm::vec3(2.f * sin(glfwGetTime()), 0.f, 1.5f * cos(glfwGetTime()));
-	this->shaders[SHADER_CORE_PROGRAM]->setVec3f(light, "lightPos0");
+	this->shaders[SKYBOX_PROGRAM]->setMat4fv(this->ViewMatrix, "ViewMatrix");
 
-	//Update framebuffer size and projection matrix
+	lights[0] = new glm::vec3(2.5f * sin(glfwGetTime()), 1.f, 2.5f * cos(glfwGetTime()));
+
+	this->shaders[SHADER_CORE_PROGRAM]->setVec3f(*this->lights[0], "lightPos0");
+
+	// Update framebuffer size and projection matrix
 	glfwGetFramebufferSize(this->window, &this->framebufferWidth, &this->framebufferHeight);
 
 	this->ProjectionMatrix = glm::perspective(
@@ -233,15 +270,14 @@ void Engine::updateUniforms()
 	);
 
 	this->shaders[SHADER_CORE_PROGRAM]->setMat4fv(this->ProjectionMatrix, "ProjectionMatrix");
+	this->shaders[SKYBOX_PROGRAM]->setMat4fv(this->ProjectionMatrix, "ProjectionMatrix");
 }
 
-//Constructors / Destructors
+// Constructors / Destructors
 Engine::Engine(
 	const char* title,
 	const int WINDOW_WIDTH, const int WINDOW_HEIGHT,
-	const int GL_VERSION_MAJOR, const int GL_VERSION_MINOR,
-	bool resizable
-)
+	const int GL_VERSION_MAJOR, const int GL_VERSION_MINOR)
 	:
 	WINDOW_WIDTH(WINDOW_WIDTH),
 	WINDOW_HEIGHT(WINDOW_HEIGHT),
@@ -249,20 +285,20 @@ Engine::Engine(
 	GL_VERSION_MINOR(GL_VERSION_MINOR),
 	camera(glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, 1.f, 0.f))
 {
-	//Init variables
+	// Init variables
 	this->window = nullptr;
 	this->framebufferWidth = this->WINDOW_WIDTH;
 	this->framebufferHeight = this->WINDOW_HEIGHT;
 
-	this->camPosition = glm::vec3(0.f, 0.f, 1.f);
-	this->worldUp = glm::vec3(0.f, 1.f, 0.f);
+	this->cameraPosition = glm::vec3(0.f, 0.f, 1.f);
+	this->cameraUp = glm::vec3(0.f, 1.f, 0.f);
 	this->camFront = glm::vec3(0.f, 0.f, -1.f);
 
 	this->fov = 90.f;
 	this->nearPlane = 0.1f;
 	this->farPlane = 1000.f;
 
-	this->dt = 0.f;
+	this->deltaTime = 0.f;
 	this->curTime = 0.f;
 	this->lastTime = 0.f;
 
@@ -275,7 +311,7 @@ Engine::Engine(
 	this->firstMouse = true;
 
 	this->initGLFW();
-	this->initWindow(title, resizable);
+	this->initWindow(title);
 	this->initGLEW();
 	this->initOpenGLOptions();
 
@@ -309,23 +345,23 @@ Engine::~Engine()
 		delete this->lights[i];
 }
 
-//Accessor
+// Accessor
 int Engine::getWindowShouldClose()
 {
 	return glfwWindowShouldClose(this->window);
 }
 
-//Modifier
+// Modifier
 void Engine::setWindowShouldClose()
 {
 	glfwSetWindowShouldClose(this->window, GLFW_TRUE);
 }
 
-//Functions
-void Engine::updateDt()
+// Functions
+void Engine::updatedeltaTime()
 {
 	this->curTime = static_cast<float>(glfwGetTime());
-	this->dt = this->curTime - this->lastTime;
+	this->deltaTime = this->curTime - this->lastTime;
 	this->lastTime = this->curTime;
 }
 
@@ -340,47 +376,39 @@ void Engine::updateMouseInput()
 		this->firstMouse = false;
 	}
 
-	//Calc offset
+	// Calc offset
 	this->mouseOffsetX = this->mouseX - this->lastMouseX;
 	this->mouseOffsetY = this->lastMouseY - this->mouseY;
 
-	//Set last X and Y
+	// Set last X and Y
 	this->lastMouseX = this->mouseX;
 	this->lastMouseY = this->mouseY;
 }
 
 void Engine::updateKeyboardInput()
 {
-	//Program
+	// Program
 	if (glfwGetKey(this->window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 	{
 		glfwSetWindowShouldClose(this->window, GLFW_TRUE);
 	}
 
-	//Camera
+	// Camera
 	if (glfwGetKey(this->window, GLFW_KEY_W) == GLFW_PRESS)
 	{
-		this->camera.move(this->dt, FORWARD);
+		this->camera.move(this->deltaTime, FORWARD);
 	}
 	if (glfwGetKey(this->window, GLFW_KEY_S) == GLFW_PRESS)
 	{
-		this->camera.move(this->dt, BACKWARD);
+		this->camera.move(this->deltaTime, BACKWARD);
 	}
 	if (glfwGetKey(this->window, GLFW_KEY_A) == GLFW_PRESS)
 	{
-		this->camera.move(this->dt, LEFT);
+		this->camera.move(this->deltaTime, LEFT);
 	}
 	if (glfwGetKey(this->window, GLFW_KEY_D) == GLFW_PRESS)
 	{
-		this->camera.move(this->dt, RIGHT);
-	}
-	if (glfwGetKey(this->window, GLFW_KEY_C) == GLFW_PRESS)
-	{
-		this->camPosition.y -= 0.05f;
-	}
-	if (glfwGetKey(this->window, GLFW_KEY_SPACE) == GLFW_PRESS)
-	{
-		this->camPosition.y += 0.05f;
+		this->camera.move(this->deltaTime, RIGHT);
 	}
 }
 
@@ -390,36 +418,50 @@ void Engine::updateInput()
 
 	this->updateKeyboardInput();
 	this->updateMouseInput();
-	this->camera.updateInput(dt, -1, this->mouseOffsetX, this->mouseOffsetY);
+	this->camera.updateInput(deltaTime, -1, this->mouseOffsetX, this->mouseOffsetY);
 }
 
 void Engine::update()
 {
-	//UPDATE INPUT ---
-	this->updateDt();
+	// UPDATE INPUT ---
+	this->updatedeltaTime();
 	this->updateInput();
 
-	//this->models[0]->rotate(glm::vec3(0.f, 1.f, 0.f));
-	//this->models[1]->rotate(glm::vec3(0.f, 1.f, 0.f));
-	//this->models[2]->rotate(glm::vec3(0.f, 1.f, 0.f));
+	this->models[3]->rotate(glm::vec3(0.f, 1.f, 0.f));
+
+
+	//this->models[3]->move(glm::vec3(0.f, 0.f, -0.002f), 8);
+	// this->models[3]->rotate(glm::vec3(0.f, 1.f, 0.f));
 
 }
 
 void Engine::render()
 {
-	//DRAW ---
-	//Clear
+	
+	// DRAW ---
+	// Clear
 	glClearColor(0.f, 0.f, 0.f, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	//Update the uniforms
+	// Update the uniforms
 	this->updateUniforms();
 
-	//Render models
-	for (auto&i : this->models)
-		i->render(this->shaders[SHADER_CORE_PROGRAM]);
+	
+	//skybox->render(this->shaders[SKYBOX_PROGRAM]);
 
-	//End Draw
+	// Render models
+	for (auto&i : this->models) {
+		//if (first) {
+			//i->render(this->shaders[SKYBOX_PROGRAM]);
+			//glDepthFunc(GL_LESS);
+			//first = false;
+		//}
+		//else
+			i->render(this->shaders[SHADER_CORE_PROGRAM]);
+	}
+	first = true;
+	
+	// End Draw
 	glfwSwapBuffers(window);
 	glFlush();
 
@@ -428,10 +470,4 @@ void Engine::render()
 	glActiveTexture(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
-
-//Static functions
-void Engine::framebuffer_resize_callback(GLFWwindow* window, int fbW, int fbH)
-{
-	glViewport(0, 0, fbW, fbH);
-};
 

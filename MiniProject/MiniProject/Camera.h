@@ -20,7 +20,7 @@ private:
 	GLfloat movementSpeed;
 	GLfloat sensitivity;
 
-	glm::vec3 worldUp;
+	glm::vec3 cameraUp;
 	glm::vec3 position;
 	glm::vec3 front;
 	glm::vec3 right;
@@ -28,7 +28,6 @@ private:
 
 	GLfloat pitch;
 	GLfloat yaw;
-	GLfloat roll;
 
 	void updateCameraVectors()
 	{
@@ -37,26 +36,25 @@ private:
 		this->front.z = sin(glm::radians(this->yaw)) * cos(glm::radians(this->pitch));
 
 		this->front = glm::normalize(this->front);
-		this->right = glm::normalize(glm::cross(this->front, this->worldUp));
+		this->right = glm::normalize(glm::cross(this->front, this->cameraUp));
 		this->up = glm::normalize(glm::cross(this->right, this->front));
 	}
 
 public:
-	Camera(glm::vec3 position, glm::vec3 direction, glm::vec3 worldUp)
+	Camera(glm::vec3 position, glm::vec3 direction, glm::vec3 cameraUp)
 	{
 		this->ViewMatrix = glm::mat4(1.f);
 
 		this->movementSpeed = 3.f;
 		this->sensitivity = 5.f;
 
-		this->worldUp = worldUp;
+		this->cameraUp = cameraUp;
 		this->position = position;
 		this->right = glm::vec3(0.f);
-		this->up = worldUp;
+		this->up = cameraUp;
 
 		this->pitch = 0.f;
 		this->yaw = -90.f;
-		this->roll = 0.f;
 
 		this->updateCameraVectors();
 	}
@@ -78,34 +76,34 @@ public:
 		return this->position;
 	}
 
-	//Functions
-	void move(const float& dt, const int direction)
+	// Functions
+	void move(const float& deltaTime, const int direction)
 	{
-		//Update position vector
+		// Update position vector
 		switch (direction)
 		{
 		case FORWARD:
-			this->position += this->front * this->movementSpeed * dt;
+			this->position += this->front * this->movementSpeed * deltaTime;
 			break;
 		case BACKWARD:
-			this->position -= this->front * this->movementSpeed * dt;
+			this->position -= this->front * this->movementSpeed * deltaTime;
 			break;
 		case LEFT:
-			this->position -= this->right * this->movementSpeed * dt;
+			this->position -= this->right * this->movementSpeed * deltaTime;
 			break;
 		case RIGHT:
-			this->position += this->right * this->movementSpeed * dt;
+			this->position += this->right * this->movementSpeed * deltaTime;
 			break;
 		default:
 			break;
 		}
 	}
 
-	void updateMouseInput(const float& dt, const double& offsetX, const double& offsetY)
+	void updateMouseInput(const float& deltaTime, const double& offsetX, const double& offsetY)
 	{
-		//Update pitch yaw and roll
-		this->pitch += static_cast<GLfloat>(offsetY) * this->sensitivity * dt;
-		this->yaw += static_cast<GLfloat>(offsetX) * this->sensitivity * dt;
+		// Update pitch yaw and roll
+		this->pitch += static_cast<GLfloat>(offsetY) * this->sensitivity * deltaTime;
+		this->yaw += static_cast<GLfloat>(offsetX) * this->sensitivity * deltaTime;
 
 		if (this->pitch > 80.f)
 			this->pitch = 80.f;
@@ -116,9 +114,9 @@ public:
 			this->yaw = 0.f;
 	}
 
-	void updateInput(const float& dt, const int direction, const double& offsetX, const double& offsetY)
+	void updateInput(const float& deltaTime, const int direction, const double& offsetX, const double& offsetY)
 	{
-		this->updateMouseInput(dt, offsetX, offsetY);
+		this->updateMouseInput(deltaTime, offsetX, offsetY);
 	}
 
 };

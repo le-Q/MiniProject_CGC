@@ -13,10 +13,6 @@ private:
 	std::vector<Mesh*> meshes;
 	glm::vec3 position;
 
-	void updateUniforms() {
-
-	}
-
 public:
 	Model(
 		glm::vec3 position,
@@ -49,11 +45,32 @@ public:
 			delete i;
 	}
 
-	//Functions
+	// Functions
 	void rotate(const glm::vec3 rotation)
 	{
 		for (auto& i : this->meshes)
 			i->rotate(rotation);
+	}
+
+	void move(const glm::vec3 position, int movement)
+	{
+		for (auto& i : this->meshes) {
+			int currentNumber = movement;
+			if (currentNumber < movement / 2) {
+				i->move(position);
+				currentNumber += 1 * glfwGetTime();
+				std::cout << "PLUSS: " << currentNumber << "\n";
+			}
+			else if (currentNumber < movement)
+			{
+				i->move(-position);
+				currentNumber += 1*glfwGetTime();
+				std::cout << "Minus: " << currentNumber << "\n";
+			}
+			else
+				currentNumber = 0;
+		}
+			
 	}
 
 	void update()
@@ -63,20 +80,18 @@ public:
 
 	void render(Shader* shader)
 	{
-		//Update the uniforms
-		this->updateUniforms();
 
-		//Update uniforms
+		// Update uniforms
 		this->material->sendToShader(*shader);
 
-		//Use a program
+		// Use a program
 		shader->use();
 
-		//Activate texture
+		// Activate texture
 		this->overrideTextureDiffuse->bind(0);
 		this->overrideTextureSpecular->bind(1);
 
-		//Draw
+		// Draw
 		for (auto& i : this->meshes)
 			i->render(shader);
 	}

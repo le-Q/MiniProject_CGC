@@ -135,12 +135,15 @@
     <ClInclude Include="Model.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Shape.h" />
+    <ClInclude Include="Skybox.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="fragment.glsl" />
+    <None Include="fragment_sky.glsl" />
     <None Include="vertex.glsl" />
+    <None Include="vertex_sky.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
