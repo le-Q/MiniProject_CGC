@@ -6,7 +6,7 @@
 
 // ENUMERATIONS
 enum shader_enum { SHADER_CORE_PROGRAM = 0, SKYBOX_PROGRAM };
-enum texture_enum { TEX_CONTAINER = 0, TEX_CONTAINER_SPECULAR, TEX_WOOD, SKYBOX };
+enum texture_enum { TEX_CONTAINER = 0, TEX_CONTAINER_SPECULAR, TEX_WOOD, TEX_AWESOME, SKYBOX };
 enum material_enum { MAT_1 = 0 };
 enum mesh_enum { MESH_QUAD = 0 };
 

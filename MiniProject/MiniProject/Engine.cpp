@@ -97,6 +97,9 @@ void Engine::initializeTextures()
 	// TEXTURE 1
 	this->textures.push_back(new Texture("Images/wood.png", GL_TEXTURE_2D));
 
+	// TEXTURE 2
+	this->textures.push_back(new Texture("Images/awesomeface.png", GL_TEXTURE_2D));
+
 	// SkyBox
 	this->textures.push_back(new Texture(faces, GL_TEXTURE_CUBE_MAP));
 }
@@ -115,25 +118,6 @@ void Engine::initializeModels()
 	std::vector<Mesh*>skyboxTest;
 
 	skybox = new Skybox();
-
-	skyboxTest.push_back(
-		new Mesh(
-			&SkyboxShape(),
-			glm::vec3(0.f, 0.f, 0.f),
-			glm::vec3(0.f),
-			glm::vec3(0.f),
-			glm::vec3(20.f)
-		)
-	);
-
-	this->models.push_back(new Model(
-		glm::vec3(0.f),
-		this->materials[0],
-		this->textures[SKYBOX],
-		this->textures[SKYBOX],
-		skyboxTest
-	)
-	);
 
 	floor.push_back(
 		new Mesh(
@@ -219,6 +203,15 @@ void Engine::initializeModels()
 		cubes
 	)
 	);
+
+	this->models.push_back(new Model(
+		glm::vec3(-2.f, 0.f, 3.f),
+		this->materials[0],
+		this->textures[TEX_AWESOME],
+		this->textures[TEX_AWESOME],
+		cubes
+	)
+	);
 	
 
 	for (auto*& i : meshes)
@@ -238,8 +231,12 @@ void Engine::initializeUniforms()
 	// INIT UNIFORMS
 	this->shaders[SHADER_CORE_PROGRAM]->setMat4fv(ViewMatrix, "ViewMatrix");
 	this->shaders[SHADER_CORE_PROGRAM]->setMat4fv(ProjectionMatrix, "ProjectionMatrix");
+
+	glDepthFunc(GL_LEQUAL);
+	this->ViewMatrix = glm::mat4(this->camera.getViewMatrix());
 	this->shaders[SKYBOX_PROGRAM]->setMat4fv(ViewMatrix, "ViewMatrix");
 	this->shaders[SKYBOX_PROGRAM]->setMat4fv(ProjectionMatrix, "ProjectionMatrix");
+	glDepthFunc(GL_LESS);
 
 
 	this->shaders[SHADER_CORE_PROGRAM]->setVec3f(*this->lights[0], "lightPos0");
@@ -253,8 +250,10 @@ void Engine::updateUniforms()
 	this->shaders[SHADER_CORE_PROGRAM]->setMat4fv(this->ViewMatrix, "ViewMatrix");
 	this->shaders[SHADER_CORE_PROGRAM]->setVec3f(this->camera.getPosition(), "cameraPos");
 
+	glDepthFunc(GL_LEQUAL);
+	this->ViewMatrix = glm::mat4(glm::mat3(this->camera.getViewMatrix()));
 	this->shaders[SKYBOX_PROGRAM]->setMat4fv(this->ViewMatrix, "ViewMatrix");
-
+	glDepthFunc(GL_LESS);
 	lights[0] = new glm::vec3(2.5f * sin(glfwGetTime()), 1.f, 2.5f * cos(glfwGetTime()));
 
 	this->shaders[SHADER_CORE_PROGRAM]->setVec3f(*this->lights[0], "lightPos0");
@@ -410,6 +409,13 @@ void Engine::updateKeyboardInput()
 	{
 		this->camera.move(this->deltaTime, RIGHT);
 	}
+
+	// Clicktest
+	if (glfwGetKey(this->window, GLFW_KEY_1) == GLFW_PRESS)
+	{
+		// Press... onclick?
+		std::cout << "Change or switch texture or something: " << "\n";
+	}
 }
 
 void Engine::updateInput()
@@ -427,10 +433,10 @@ void Engine::update()
 	this->updatedeltaTime();
 	this->updateInput();
 
-	this->models[3]->rotate(glm::vec3(0.f, 1.f, 0.f));
+	this->models[2]->rotate(glm::vec3(0.f, 1.f, 0.f));
 
 
-	//this->models[3]->move(glm::vec3(0.f, 0.f, -0.002f), 8);
+	this->models[1]->move(glm::vec3(0.f, 0.f, -0.008f));
 	//this->models[3]->rotate(glm::vec3(0.f, 1.f, 0.f));
 
 }
@@ -447,20 +453,15 @@ void Engine::render()
 	this->updateUniforms();
 
 	
-	//skybox->render(this->shaders[SKYBOX_PROGRAM]);
+	
 
 	// Render models
 	for (auto&i : this->models) {
-		//if (first) {
-			//i->render(this->shaders[SKYBOX_PROGRAM]);
-			//glDepthFunc(GL_LESS);
-			//first = false;
-		//}
-		//else
-			i->render(this->shaders[SHADER_CORE_PROGRAM]);
+		i->render(this->shaders[SHADER_CORE_PROGRAM]);
 	}
-	first = true;
 	
+	skybox->render(this->shaders[SKYBOX_PROGRAM]);
+
 	// End Draw
 	glfwSwapBuffers(window);
 	glFlush();

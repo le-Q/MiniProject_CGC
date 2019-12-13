@@ -52,23 +52,10 @@ public:
 			i->rotate(rotation);
 	}
 
-	void move(const glm::vec3 position, int movement)
+	void move(const glm::vec3 position)
 	{
 		for (auto& i : this->meshes) {
-			int currentNumber = movement;
-			if (currentNumber < movement / 2) {
-				i->move(position);
-				currentNumber += 1 * glfwGetTime();
-				std::cout << "PLUSS: " << currentNumber << "\n";
-			}
-			else if (currentNumber < movement)
-			{
-				i->move(-position);
-				currentNumber += 1*glfwGetTime();
-				std::cout << "Minus: " << currentNumber << "\n";
-			}
-			else
-				currentNumber = 0;
+			i->move(position);
 		}
 			
 	}

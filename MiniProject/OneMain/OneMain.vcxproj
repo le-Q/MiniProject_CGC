@@ -130,6 +130,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="final.cpp" />
+    <ClCompile Include="learnopenglSkybox.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="plane.frag" />
@@ -142,7 +143,11 @@
     <None Include="sky.vs" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="camera.h" />
+    <ClInclude Include="model.h" />
     <ClInclude Include="shader.h" />
+    <ClInclude Include="shader_m.h" />
+    <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

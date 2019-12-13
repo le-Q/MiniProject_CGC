@@ -62,7 +62,7 @@ private:
 	GLuint VBO;
 	GLuint EBO;
 
-	void initializeSkyVAO()
+	void initializeVAO()
 	{
 		// Create VAO
 		glCreateVertexArrays(1, &this->VAO);
@@ -76,8 +76,8 @@ private:
 
 		// SET VERTEXATTRIBPOINTERS AND ENABLE (INPUT ASSEMBLY)
 		// Position
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
 		// BIND VAO 0
 		glBindVertexArray(0);
@@ -87,7 +87,7 @@ private:
 public:
 	Skybox()
 	{
-		this->initializeSkyVAO();
+		this->initializeVAO();
 	}
 
 	~Skybox()
@@ -118,7 +118,7 @@ public:
 		glBindVertexArray(this->VAO);
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, 3);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, 4);
 
 		// RENDER
 		glDrawArrays(GL_TRIANGLES, 0, 36);
